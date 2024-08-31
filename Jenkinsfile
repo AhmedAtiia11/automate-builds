@@ -8,11 +8,10 @@ pipeline {
         checkout scm
     }
       }
-      // Build  React Dockerfile and Rename it with the Dockerhub-reg Account name and Add the commmit number as tag name 
-      stage('Test and Build React Image') {
+      // Build Dockerfile
+      stage('Build Maven Image') {
          steps {       
          script {  
-                    // env.GIT_COMMIT_REV = sh (script: 'git log -n 1 --pretty=format:"%h"', returnStdout: true)
                     sh '''
                           docker build -t hello-world-app .
                        '''   
@@ -21,14 +20,20 @@ pipeline {
      }
 
      // push Docker Images to the registry with the modified name 
-    stage('Deploy Image') {
-      steps{
-        script {
+      stage('Run docker container') {
+        steps{
+          script {
             sh 'docker run  hello-world-app'
+            }
           }
         }
+    stage('Trigger Ansible job ') {
+                steps {
+                echo "triggering Ansible Job"
+                build job: 'ansible_pipeline' 
+        }
+        }      
       }
     }     
-  }
 
 
